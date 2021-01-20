@@ -67,6 +67,10 @@ export default {
 </script>
 
 <style scoped>
+.container {
+    background-color: chocolate;
+}
+
 main {
     width: 80%;
     margin: 0 auto;
