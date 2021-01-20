@@ -42,5 +42,27 @@ pipeline {
                 }
             }
         }
+
+
+        stage("Deploy") {
+            steps {
+                script {
+                    sshPublisher(
+                        publishers: [
+                            sshPublisherDesc(
+                                configName: 'devserver',
+                                verbose: false,
+                                transfers: [
+                                    sshTransfer(
+                                        execCommand : "docker pull ${image_name}; docker kill vuevue; docker run -d --rm --name vuevue -p 8080:80 ${image_name}",
+                                        execTimeout: 1200000
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                }
+            }
+        }
     }
 }
