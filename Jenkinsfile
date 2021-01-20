@@ -1,40 +1,45 @@
+def dockerhub = "bukanebi/jenkins"
+def image_name = "${dockerhub}:${BRANCH_NAME}"
+def builder
+
 pipeline {
 
     agent any
 
-    parameters {
-        string(name: 'DOCKERHUB', defaultValue: 'hallo params', description: 'blablabla')
-        booleanParam(name: 'RUNTEST', defaultValue: 'false', description: 'blablabla')
-        choice(name: 'DEPLOY', choices: ["Yes", "No"], description: 'blablabla')
-    }
-
     stages {
 
-        stage("Build") {
+        stage("Install depdencies") {
             steps {
-                echo "hallo"
+                nodejs("node14") {
+                    sh 'yarn install'
+                }
             }
         }
 
-        stage("Testing") {
-            when {
-                expression {
-                    params.RUNTEST
-                }
-            }
+        stage("build docker") {
             steps {
-                echo "hallo"
+                script {
+                    builder = docker.build("${dockerhub}:${BRANCH_NAME}")
+                }
             }
         }
 
-        stage("Deploy") {
-            when {
-                expression {
-                    params.DEPLOY == "Yes"
+
+        stage("Testing Image") {
+            steps {
+                script {
+                    builder.inside {
+                        sh 'echo passed'
+                    }
                 }
             }
+        }
+
+        stage("Push Iamge") {
             steps {
-                echo "hallo"
+                script {
+                    builder.push()
+                }
             }
         }
     }
